@@ -1,16 +1,17 @@
 """专注记录 JSON 导入导出。"""
 import json
-from datetime import datetime
 from sqlite3 import Connection
 from . import repositories
 
 FIELDS = ("task_text", "duration_seconds", "remaining_seconds", "started_at", "last_started_at", "finished_at", "status", "archived")
 
 def export_json(connection):
-    return json.dumps(repositories.all_sessions(connection), ensure_ascii=False, indent=2)
+    return json.dumps({"version": 1, "sessions": repositories.all_sessions(connection)}, ensure_ascii=False, indent=2)
 
 def import_json(connection, payload, *, replace=False):
     records = json.loads(payload) if isinstance(payload, str) else payload
+    if isinstance(records, dict):
+        records = records.get("sessions")
     if not isinstance(records, list): raise ValueError("导入内容必须是记录数组")
     if replace: connection.execute("DELETE FROM focus_sessions")
     count = 0

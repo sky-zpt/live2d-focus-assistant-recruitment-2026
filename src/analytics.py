@@ -59,6 +59,6 @@ def streaks(connection):
 
 
 def report(connection):
-    data = summary(connection)
-    data.update(streaks(connection))
-    return data
+    # Baseline report intentionally exposes only the basic counters. Date-range
+    # filtering, streaks and a readable text rendering are left for follow-up work.
+    return summary(connection)

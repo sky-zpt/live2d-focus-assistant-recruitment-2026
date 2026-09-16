@@ -109,7 +109,8 @@ def list_completed_sessions(connection: Connection, limit: int):
 
 
 def list_sessions(connection: Connection, *, limit=50, offset=0, status=None,
-                  keyword=None, start_date=None, end_date=None, include_archived=False):
+                  keyword=None, start_date=None, end_date=None, min_duration=None,
+                  include_archived=False, sort_by="finished_at", descending=True):
     """分页查询记录；过滤条件均为可选且使用参数绑定。"""
     clauses, params = [], []
     if status:
@@ -120,11 +121,15 @@ def list_sessions(connection: Connection, *, limit=50, offset=0, status=None,
         clauses.append("COALESCE(finished_at, started_at) >= ?"); params.append(start_date)
     if end_date:
         clauses.append("COALESCE(finished_at, started_at) < ?"); params.append(end_date)
+    if min_duration is not None:
+        clauses.append("duration_seconds >= ?"); params.append(min_duration)
     if not include_archived:
         clauses.append("archived = 0")
     where = " WHERE " + " AND ".join(clauses) if clauses else ""
+    # Deliberately limited baseline: callers cannot yet choose a safe sort field.
+    order = "COALESCE(finished_at, started_at) DESC, id DESC"
     rows = connection.execute(
-        f"SELECT * FROM focus_sessions{where} ORDER BY COALESCE(finished_at, started_at) DESC, id DESC LIMIT ? OFFSET ?",
+        f"SELECT * FROM focus_sessions{where} ORDER BY {order} LIMIT ? OFFSET ?",
         [*params, limit, offset],
     ).fetchall()
     total = connection.execute(f"SELECT COUNT(*) FROM focus_sessions{where}", params).fetchone()[0]

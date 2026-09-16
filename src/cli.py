@@ -12,12 +12,16 @@ def main():
     parser = argparse.ArgumentParser(description="Live2D 专注助手历史工具")
     parser.add_argument("command", choices=["history", "summary", "export", "cleanup"])
     parser.add_argument("path", nargs="?")
+    parser.add_argument("--status", choices=["active", "paused", "completed", "abandoned"])
+    parser.add_argument("--keyword")
+    parser.add_argument("--limit", type=int, default=50)
     args = parser.parse_args()
     app = create_app()
     with app.app_context():
         db = get_db()
         if args.command == "history":
-            for row in repositories.all_sessions(db): print(f"#{row['id']} [{row['status']}] {row['task_text']}")
+            rows, _ = repositories.list_sessions(db, limit=args.limit, status=args.status, keyword=args.keyword)
+            for row in rows: print(f"#{row['id']} [{row['status']}] {row['task_text']}")
         elif args.command == "summary":
             import json; print(json.dumps(report(db), ensure_ascii=False, indent=2))
         elif args.command == "export":
