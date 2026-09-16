@@ -19,6 +19,8 @@
 
 ## 环境与安装
 
+第一次配置 Python 的同学请阅读[零基础 Python 环境配置指南](docs/python-environment-guide.md)。准备认领 Issue 和提交 PR 的同学请先阅读[新生贡献指南](CONTRIBUTING.md)。
+
 需要 Python 3.11 或更高版本。Windows 上推荐使用 Python Launcher：
 
 ```powershell
