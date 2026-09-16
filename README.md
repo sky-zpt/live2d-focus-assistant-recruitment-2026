@@ -1,0 +1,113 @@
+# Live2D 专注助手
+
+一个只做一件事的专注网页：写下一项任务，自定义 1–120 分钟专注时长，倒计时结束后由用户确认完成；完成记录会保存到本地，Shizuku 角色会给予可见的完成反馈。
+
+它是数学建模协会技术组的招新面试项目基座。当前仓库交付的是完整可运行版本；后续只会从已验证的真实功能中整理适合新生认领的 Issue。
+
+## 功能与边界
+
+- 创建一项 1–80 字的专注任务，可设置 1–120 分钟专注时长（默认 25 分钟）；
+- 暂停、刷新恢复、继续、完成或放弃当前任务；
+- 保存并展示最近 10 条完成记录；
+- 提供历史分页、状态/关键词/日期筛选，以及完成率、每日汇总、时段分布和连续专注天数统计；
+- 支持通过 JSON 导出和导入专注记录，支持清理长时间未更新的异常会话；
+- 提供 `history`、`summary`、`export`、`cleanup` 四个本地命令行工具；
+- 使用 Live2D Shizuku 角色表达空闲、专注和完成状态；
+- 角色运行库、模型资源或 WebGL 不可用时，自动降级到静态角色卡片，专注主流程不受影响。
+
+项目明确**不包含**登录、多用户、云同步、排行榜、积分商城、语音功能、AI 大模型或外部 API 调用。所有数据默认只保存在运行机器的 SQLite 文件中。
+
+## 环境与安装
+
+需要 Python 3.11 或更高版本。Windows 上推荐使用 Python Launcher：
+
+```powershell
+cd live2d-focus-assistant
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+本机若 `python --version` 低于 3.11，请使用 `py -3.11` 替代下文的 `python`。
+
+## 启动与测试
+
+```powershell
+python app.py
+```
+
+浏览器打开 <http://127.0.0.1:5000>。
+
+运行全部自动化测试：
+
+```powershell
+python -m pytest -q
+```
+
+## 使用流程
+
+1. 在输入框写下一件要做的事，点击“开始专注”。
+2. 专注期间可暂停；刷新页面后会从服务端记录恢复当前状态和剩余时间。
+3. 倒计时到 `00:00` 后，点击“完成任务”确认完成；系统不会自动把任务标记为完成。
+4. 页面显示角色庆祝反馈，并将记录写入“最近完成”。
+
+## 后端扩展接口
+
+在保留前端使用的 `GET /api/sessions?limit=10` 接口基础上，功能完善版还提供：
+
+- `GET /api/sessions/search?page=1&page_size=20&status=completed&keyword=阅读`：分页和多条件历史查询；
+- `GET /api/stats/summary`、`/api/stats/daily?days=30`、`/api/stats/time-buckets`、`/api/stats/report`：统计与报告；
+- `GET /api/sessions/export`：下载 JSON 备份；`POST /api/sessions/import`：提交 `{ "sessions": [...], "replace": false }` 恢复；
+- `POST /api/sessions/cleanup?timeout_minutes=180`：将长期没有更新时间的开放会话标记为放弃。
+
+导入数据必须来自本项目导出格式或包含完整的任务、时间、状态字段；导入不会绕过开放会话唯一约束。
+
+## 命令行工具
+
+在项目目录执行：
+
+```powershell
+python -m src.cli history
+python -m src.cli summary
+python -m src.cli export backup.json
+python -m src.cli cleanup
+```
+
+## 项目结构
+
+```text
+repository-root/
+├─ app.py                    # Flask 应用工厂、首页与健康检查
+├─ src/
+│  ├─ db.py                  # SQLite 生命周期与建表
+│  ├─ repositories.py        # 仅负责数据存取
+│  ├─ services.py            # Python 业务规则、时间结算、状态流转
+│  ├─ analytics.py           # 汇总、趋势、时段和连续天数统计
+│  ├─ import_export.py       # JSON 备份与恢复
+│  ├─ cleanup_service.py     # 异常开放会话清理
+│  ├─ cli.py                 # 本地历史与报告命令行
+│  ├─ routes.py              # REST API
+│  └─ schema.sql             # 数据表和开放会话唯一索引
+├─ static/
+│  ├─ js/                    # API 客户端、计时器、记录与 Live2D 适配器
+│  ├─ css/app.css            # 单页样式与降级显示
+│  ├─ models/shizuku/        # Shizuku 模型资源
+│  └─ vendor/live2d-widget/ # 固定版本的本地浏览器运行库
+├─ templates/index.html
+├─ tests/
+└─ instance/focus.db         # 运行时创建；不会提交 Git
+```
+
+## 架构摘要
+
+浏览器负责显示倒计时；Flask 在开始、暂停、恢复和完成这些状态变化点保存数据。SQLite 中只保存任务、剩余秒数和时间戳，因而刷新页面后可重新计算剩余时间。
+
+`src/services.py` 是业务规则的唯一入口：负责任务校验、开放会话冲突、暂停结算和状态合法性。路由不直接写 SQL，仓储层不计算时间。`static/js/live2d-adapter.js` 将模型动作细节封装在单一模块中，页面主流程只调用 `init()` 和 `setState()`。
+
+## 参考、素材与许可证
+
+- Live2D 浏览器运行库：[`live2d-widget` 3.1.4](https://www.npmjs.com/package/live2d-widget)，来源项目 [xiazeyu/live2d-widget.js](https://github.com/xiazeyu/live2d-widget.js)，GPL-2.0。本项目固定保存所需的 `L2Dwidget.min.js` 与动态加载分包到 `static/vendor/live2d-widget/`，并由 `live2d-adapter.js` 负责本地模型路径、容器位置和失败降级处理。
+- 模型素材：上游 [xiazeyu/live2d-widget-models](https://github.com/xiazeyu/live2d-widget-models) 的 Shizuku 包。项目只保留运行所需资源于 `static/models/shizuku/`，未修改二进制模型文件。
+- 当前根仓库及上述运行库均涉及 GPL-2.0。若将本项目对外发布、二次分发或替换模型，必须先核对上游许可证、模型作者的单独授权要求，并按适用许可证履行义务。
+
+本项目没有接入大模型、第三方账号或远程数据服务；没有 API Key、Token 或用户数据上传逻辑。

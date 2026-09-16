@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="一个陪你完成一件小事的专注助手，支持自定义专注时长。"
+    />
+    <title>专注一下</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+  </head>
+  <body>
+    <div id="cat-pattern" class="cat-pattern" aria-hidden="true"></div>
+    <main class="app-shell">
+      <section class="focus-card" aria-labelledby="page-title">
+        <header class="page-header">
+          <p class="eyebrow">LIVE2D FOCUS ASSISTANT</p>
+          <h1 id="page-title">专注一下</h1>
+          <p class="intro">写下一件现在要做的事，给自己一段安静完成它的时间。</p>
+        </header>
+
+        <section class="assistant-panel" aria-label="助手状态">
+          <div class="character-visual">
+            <div id="live2d-container" class="character-stage" aria-hidden="true"></div>
+            <div id="character-fallback" class="character-fallback">
+              <span class="character-face" aria-hidden="true">✦</span>
+              <p>我会在你完成任务时为你庆祝。</p>
+            </div>
+          </div>
+          <p id="assistant-status" class="assistant-status" aria-live="polite">
+            准备好了，先从一件小事开始吧。
+          </p>
+          <p class="fallback-note">
+            即使角色暂时休息，专注计时与完成记录也能正常使用。
+          </p>
+        </section>
+
+        <section class="focus-workspace" aria-label="专注任务">
+          <form id="task-form" class="task-form" novalidate>
+            <label for="task-input">这段时间要完成什么？</label>
+            <div class="task-entry">
+              <input
+                id="task-input"
+                name="task_text"
+                type="text"
+                maxlength="80"
+                placeholder="例如：读完这一节 Python 教程"
+                autocomplete="off"
+                required
+              />
+              <label class="duration-field" for="duration-input">
+                时长
+                <input id="duration-input" name="duration_minutes" type="number" min="1" max="120" value="25" required />
+                <span>分钟</span>
+              </label>
+              <button id="start-button" class="button button-primary" type="submit">
+                开始专注
+              </button>
+            </div>
+          </form>
+
+          <div class="timer-panel" aria-label="专注倒计时">
+            <p class="timer-label">本次专注</p>
+            <output id="timer-display" class="timer-display" aria-live="polite">25:00</output>
+            <div class="timer-actions" aria-label="专注控制">
+              <button id="pause-button" class="button button-secondary" type="button" hidden>
+                暂停
+              </button>
+              <button id="resume-button" class="button button-primary" type="button" hidden>
+                继续
+              </button>
+              <button id="complete-button" class="button button-success" type="button" hidden>
+                完成任务
+              </button>
+              <button id="abandon-button" class="button button-quiet" type="button" hidden>
+                放弃本次
+              </button>
+            </div>
+            <p id="error-message" class="message message-error" role="alert" hidden></p>
+          </div>
+        </section>
+
+        <section class="history-panel" aria-labelledby="history-title">
+          <div class="section-heading">
+            <h2 id="history-title">最近完成</h2>
+            <span aria-hidden="true">✓</span>
+          </div>
+          <p id="history-empty" class="empty-state">还没有完成记录，开始第一件事吧。</p>
+          <ul id="history-list" class="history-list" aria-live="polite"></ul>
+        </section>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='vendor/live2d-widget/L2Dwidget.min.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/timer.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/live2d-adapter.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}" defer></script>
+  </body>
+</html>
