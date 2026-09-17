@@ -2,16 +2,13 @@
 
 一个只做一件事的专注网页：写下一项任务，自定义 1–120 分钟专注时长，倒计时结束后由用户确认完成；完成记录会保存到本地，Shizuku 角色会给予可见的完成反馈。
 
-它是软件学院数学建模协会技术组的招新面试项目基座。`main` 分支交付完整可运行版本；`issue-preparation` 分支用于从真实功能中整理适合新生认领的 Python Issue，不应与 `main` 合并。
+它是软件学院数学建模协会技术组的招新面试项目基座。考生以 GitHub Issue 为单位，在不改变核心专注体验的前提下完善指定的 Python 功能。
 
 ## 功能与边界
 
 - 创建一项 1–80 字的专注任务，可设置 1–120 分钟专注时长（默认 25 分钟）；
 - 暂停、刷新恢复、继续、完成或放弃当前任务；
 - 保存并展示最近 10 条完成记录；
-- 提供历史分页、状态/关键词/日期筛选，以及完成率、每日汇总、时段分布和连续专注天数统计；
-- 支持通过 JSON 导出和导入专注记录，支持清理长时间未更新的异常会话；
-- 提供 `history`、`summary`、`export`、`cleanup` 四个本地命令行工具；
 - 使用 Live2D Shizuku 角色表达空闲、专注和完成状态；
 - 角色运行库、模型资源或 WebGL 不可用时，自动降级到静态角色卡片，专注主流程不受影响。
 
@@ -53,28 +50,6 @@ python -m pytest -q
 3. 倒计时到 `00:00` 后，点击“完成任务”确认完成；系统不会自动把任务标记为完成。
 4. 页面显示角色庆祝反馈，并将记录写入“最近完成”。
 
-## 后端扩展接口
-
-在保留前端使用的 `GET /api/sessions?limit=10` 接口基础上，功能完善版还提供：
-
-- `GET /api/sessions/search?page=1&page_size=20&status=completed&keyword=阅读`：分页和多条件历史查询；
-- `GET /api/stats/summary`、`/api/stats/daily?days=30`、`/api/stats/time-buckets`、`/api/stats/report`：统计与报告；
-- `GET /api/sessions/export`：下载 JSON 备份；`POST /api/sessions/import`：提交 `{ "sessions": [...], "replace": false }` 恢复；
-- `POST /api/sessions/cleanup?timeout_minutes=180`：将长期没有更新时间的开放会话标记为放弃。
-
-导入数据必须来自本项目导出格式或包含完整的任务、时间、状态字段；导入不会绕过开放会话唯一约束。
-
-## 命令行工具
-
-在项目目录执行：
-
-```powershell
-python -m src.cli history
-python -m src.cli summary
-python -m src.cli export backup.json
-python -m src.cli cleanup
-```
-
 ## 项目结构
 
 ```text
@@ -84,10 +59,10 @@ repository-root/
 │  ├─ db.py                  # SQLite 生命周期与建表
 │  ├─ repositories.py        # 仅负责数据存取
 │  ├─ services.py            # Python 业务规则、时间结算、状态流转
-│  ├─ analytics.py           # 汇总、趋势、时段和连续天数统计
-│  ├─ import_export.py       # JSON 备份与恢复
-│  ├─ cleanup_service.py     # 异常开放会话清理
-│  ├─ cli.py                 # 本地历史与报告命令行
+│  ├─ analytics.py           # 专注记录统计入口
+│  ├─ import_export.py       # 专注记录备份与恢复入口
+│  ├─ cleanup_service.py     # 开放会话清理入口
+│  ├─ cli.py                 # 本地命令行入口
 │  ├─ routes.py              # REST API
 │  └─ schema.sql             # 数据表和开放会话唯一索引
 ├─ static/
