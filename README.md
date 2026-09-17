@@ -2,7 +2,7 @@
 
 一个只做一件事的专注网页：写下一项任务，自定义 1–120 分钟专注时长，倒计时结束后由用户确认完成；完成记录会保存到本地，Shizuku 角色会给予可见的完成反馈。
 
-它是软件学院数学建模协会技术组的招新面试项目基座。考生以 GitHub Issue 为单位，在不改变核心专注体验的前提下完善指定的 Python 功能。
+它是软件学院数学建模协会技术组的招新面试项目基座。考生可认领 GitHub Issue 完善指定 Python 功能，或在 `contrib/` 中完成独立的 Python 小项目。
 
 ## 功能与边界
 
@@ -71,6 +71,7 @@ repository-root/
 │  ├─ models/shizuku/        # Shizuku 模型资源
 │  └─ vendor/live2d-widget/ # 固定版本的本地浏览器运行库
 ├─ templates/index.html
+├─ contrib/                  # Free-play 独立项目及提交规范
 ├─ tests/
 └─ instance/focus.db         # 运行时创建；不会提交 Git
 ```

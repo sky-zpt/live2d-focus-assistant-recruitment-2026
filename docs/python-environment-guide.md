@@ -46,8 +46,8 @@ python3 --version
 建议先按[贡献指南](../CONTRIBUTING.md) Fork 项目，再 Clone 自己的仓库：
 
 ```bash
-git clone https://github.com/你的用户名/live2d-focus-assistant.git
-cd live2d-focus-assistant
+git clone https://github.com/double-god/live2d-focus-assistant-recruitment-2026.git
+cd live2d-focus-assistant-recruitment-2026
 ```
 
 如果提示找不到 `git`，请先安装 [Git](https://git-scm.com/downloads)。也可以使用 GitHub Desktop 完成 Clone，再在项目目录打开终端。
